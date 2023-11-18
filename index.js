@@ -19,17 +19,18 @@ const Url = mongoose.model('Url', urlSchema);
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-      console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB");
   })
   .catch(() => {
-      console.log("Couldn't connect to MongoDB");
+    console.log("Couldn't connect to MongoDB");
   });
 
+//let url;
 // Create and save a document instance of a url
 function createAndSaveUrl(originalUrl, shortUrl) {
-  let url = new Url({ original_url: originalUrl, short_url: shortUrl });
-  console.log(url.original_url, "  ", url.short_url);
-  url.save()
+  const Url = new Url({ original_url: originalUrl, short_url: shortUrl });
+  console.log(Url.original_url, "  ", Url.short_url);
+  Url.save()
     .then(() => {
       console.log("Url saved successfully");
     })
@@ -37,10 +38,6 @@ function createAndSaveUrl(originalUrl, shortUrl) {
       console.error("Error saving url:", err);
     });
 }
-
-let originalUrl = 'http://davidTodd.com';
-let shortUrl = 3;
-createAndSaveUrl(originalUrl, shortUrl);
 
 // Middleware
 app.use(cors());
@@ -58,16 +55,25 @@ const validateUrl = (req, res, next) => {
   next();
 }
 
+// Function to get the total document count
+function getTotalDocumentCount() { 
+  return Url.countDocuments({}); 
+}
+
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
 // Your first API endpoint
 app.post('/api/shorturl', validateUrl, function (req, res) {
-  console.log(req.body);
   let original_url = req.body.url;
-  let short_url;
-  res.json({ original_url: original_url, short_url: "Todo" });
+  //let count  = getTotalDocumentCount();  
+  //console.log(count);
+  //createAndSaveUrl(originalUrl, shortUrl);
+  console.log(req.body);
+
+
+  res.json({ original_url: original_url, short_url: 888 });  // short_url to be fixed
 });
 
 app.get('/api/shorturl/:short_url', (req, res) => {
