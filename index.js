@@ -29,7 +29,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Create and save a document instance of a url
 function createAndSaveUrl(originalUrl, shortUrl) {
   const Url = new Url({ original_url: originalUrl, short_url: shortUrl });
-  console.log(Url.original_url, "  ", Url.short_url);
+  //console.log(Url.original_url, "  ", Url.short_url);
   Url.save()
     .then(() => {
       console.log("Url saved successfully");
@@ -50,7 +50,7 @@ app.use(bodyParser.json());
 const validateUrl = (req, res, next) => {
   const { url } = req.body;
   if (!validator.isURL(url)) {
-    return res.status(400).json({ error: "Invalid url" });
+    return res.status(400).json({ error: "Invalid URL" });
   }
   next();
 }
@@ -85,7 +85,7 @@ app.post('/api/shorturl', validateUrl, async function (req, res) {
 app.get('/api/shorturl/:short_url',  async (req, res) => {
   let shortUrl = req.params.short_url;    
   const url = await Url.findOne({short_url: shortUrl})
-  console.log(url.original_url);
+  //console.log(url.original_url);
   res.redirect(url.original_url);
 
 });
