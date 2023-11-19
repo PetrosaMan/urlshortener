@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGO_URI)
     console.log("Couldn't connect to MongoDB");
   });
 
-//let url;
+
 // Create and save a document instance of a url
 function createAndSaveUrl(originalUrl, shortUrl) {
   const Url = new Url({ original_url: originalUrl, short_url: shortUrl });
@@ -55,30 +55,39 @@ const validateUrl = (req, res, next) => {
   next();
 }
 
-// Function to get the total document count
-function getTotalDocumentCount() { 
-  return Url.countDocuments({}); 
-}
-
 app.get('/', function (req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
 // Your first API endpoint
-app.post('/api/shorturl', validateUrl, function (req, res) {
-  let original_url = req.body.url;
-  //let count  = getTotalDocumentCount();  
-  //console.log(count);
-  //createAndSaveUrl(originalUrl, shortUrl);
-  console.log(req.body);
+app.post('/api/shorturl', validateUrl, async function (req, res) {  
+  
+  try {
+    let originalUrl = req.body.url;
+       
+    // Get the current maximum short_url number + 1 this short_url
+    let urls = await Url.find().sort({short_url: "desc"});
+    let shortUrl = urls[0].short_url + 1;         
 
+    // Create and save the document
+    let url = new Url({ original_url: originalUrl, short_url: shortUrl });
+    await url.save();
+   
+    // Respond with the result
+    res.json({ original_url: originalUrl, short_url: shortUrl }); 
 
-  res.json({ original_url: original_url, short_url: 888 });  // short_url to be fixed
+  } catch (err) {
+    // Handle errors
+    res.status(500).json({ error: "Internal server error" });
+  }   
 });
 
-app.get('/api/shorturl/:short_url', (req, res) => {
-  let short_url = req.params.short_url
-  res.json({ Hello: parseInt(short_url) });
+app.get('/api/shorturl/:short_url',  async (req, res) => {
+  let shortUrl = req.params.short_url;    
+  const url = await Url.findOne({short_url: shortUrl})
+  console.log(url.original_url);
+  res.redirect(url.original_url);
+
 });
 
 app.listen(port, function () {
