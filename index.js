@@ -68,7 +68,7 @@ app.post('/api/shorturl', validateUrl, async function (req, res) {
        
     // Get the current maximum short_url number + 1 this short_url
     let urls = await Url.find().sort({short_url: "desc"});
-    let shortUrl = urls[0].short_url + 1;         
+    shortUrl = urls[0].short_url + 1;            
 
     // Create and save the document
     let url = new Url({ original_url: originalUrl, short_url: shortUrl });
