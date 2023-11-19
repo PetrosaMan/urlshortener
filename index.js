@@ -1,11 +1,12 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');
+const app = express();
+
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const validator = require('validator');
 
-const app = express();
 const port = process.env.PORT || 3000;
 
 // Create urlSchema
@@ -41,8 +42,8 @@ function createAndSaveUrl(originalUrl, shortUrl) {
 
 // Middleware
 app.use(cors());
-app.use(express.urlencoded({ extended: false }));
 app.use('/public', express.static(`${process.cwd()}/public`));
+app.use(express.urlencoded({ extended: false }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
@@ -50,7 +51,7 @@ app.use(bodyParser.json());
 const validateUrl = (req, res, next) => {
   const { url } = req.body;
   if (!validator.isURL(url)) {
-    return res.status(400).json({ error: "Invalid URL" });
+    return res.status(400).json({ error: "invalid url" });    
   }
   next();
 }
@@ -84,10 +85,8 @@ app.post('/api/shorturl', validateUrl, async function (req, res) {
 
 app.get('/api/shorturl/:short_url',  async (req, res) => {
   let shortUrl = req.params.short_url;    
-  const url = await Url.findOne({short_url: shortUrl})
-  //console.log(url.original_url);
+  const url = await Url.findOne({short_url: shortUrl});  
   res.redirect(url.original_url);
-
 });
 
 app.listen(port, function () {
